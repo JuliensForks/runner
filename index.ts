@@ -13,6 +13,7 @@ import fastGlob from 'fast-glob'
 import inclusion from 'inclusion'
 import { pathToFileURL } from 'url'
 import { Hooks } from '@poppinss/hooks'
+import { logger } from '@poppinss/cliui'
 import { ErrorsPrinter } from '@japa/errors-printer'
 import { Emitter, Refiner, TestExecutor, ReporterContract } from '@japa/core'
 import { Test, TestContext, Group, Suite, Runner } from './src/Core'
@@ -436,6 +437,32 @@ export async function run() {
   }
 }
 
+function showHelp() {
+  const packageJson = require('../package.json')
+  const green = logger.colors.green.bind(logger.colors)
+  const grey = logger.colors.grey.bind(logger.colors)
+
+  console.log(`
+@japa/runner v${packageJson.version}
+
+Options:
+  ${green('--tests')}                     ${grey('Specify test titles')}
+  ${green('--tags')}                      ${grey('Specify test tags')}
+  ${green('--groups')}                    ${grey('Specify group titles')}
+  ${green('--ignore-tags')}               ${grey('Specify negated tags')}
+  ${green('--files')}                     ${grey('Specify files to match and run')}
+  ${green('--force-exit')}                ${grey('Enable/disable force exit')}
+  ${green('--timeout')}                   ${grey('Define timeout for all the tests')}
+  ${green('-h, --help')}                  ${grey('Display this message')}
+
+Examples:
+  ${grey('$ node bin/test.js --tags="@github"')}
+  ${grey('$ node bin/test.js --files="example.spec.js" --force-exit')}
+  `)
+
+  process.exit(0)
+}
+
 /**
  * Process CLI arguments into configuration options. The following
  * command line arguments are processed.
@@ -451,10 +478,11 @@ export async function run() {
 export function processCliArgs(argv: string[]): Partial<Config> {
   const parsed = getopts(argv, {
     string: ['tests', 'tags', 'groups', 'ignoreTags', 'files', 'timeout'],
-    boolean: ['forceExit'],
+    boolean: ['forceExit', 'help'],
     alias: {
       ignoreTags: 'ignore-tags',
       forceExit: 'force-exit',
+      help: 'h',
     },
   })
 
@@ -470,6 +498,13 @@ export function processCliArgs(argv: string[]): Partial<Config> {
   processAsString(parsed, 'groups', (groups) => (config.filters.groups = groups))
   processAsString(parsed, 'tests', (tests) => (config.filters.tests = tests))
   processAsString(parsed, 'files', (files) => (config.filters.files = files))
+
+  /**
+   * Show help
+   */
+  if (parsed.help) {
+    showHelp()
+  }
 
   /**
    * Get suites
