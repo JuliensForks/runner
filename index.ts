@@ -442,8 +442,7 @@ function showHelp() {
   const green = logger.colors.green.bind(logger.colors)
   const grey = logger.colors.grey.bind(logger.colors)
 
-  console.log(`
-@japa/runner v${packageJson.version}
+  console.log(`@japa/runner v${packageJson.version}
 
 Options:
   ${green('--tests')}                     ${grey('Specify test titles')}
@@ -457,8 +456,7 @@ Options:
 
 Examples:
   ${grey('$ node bin/test.js --tags="@github"')}
-  ${grey('$ node bin/test.js --files="example.spec.js" --force-exit')}
-  `)
+  ${grey('$ node bin/test.js --files="example.spec.js" --force-exit')}`)
 
   process.exit(0)
 }
